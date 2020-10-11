@@ -7,6 +7,8 @@ public class playerMovement : MonoBehaviour
     [HideInInspector]
     public Transform myTF;
 
+    public grabblingGunScript myGrabblingGun;
+
     Rigidbody2D myRB;
 
     [Range(0, 5)]
@@ -29,6 +31,7 @@ public class playerMovement : MonoBehaviour
         myRB = GetComponent<Rigidbody2D>();
         movementVector = new Vector3(movementSpeed, 0,0);
         jumpVector = new Vector2(0, jF);
+
     }
 
     // Update is called once per frame
@@ -54,9 +57,10 @@ public class playerMovement : MonoBehaviour
     void jump()
     {
 
-        if (jumpAllowed)
+        if (jumpAllowed && !myGrabblingGun.grabbing)
         {
             Debug.Log("JUMP");
+            myRB.velocity = Vector3.zero;
             myRB.AddForce(jumpVector);
             jumpAllowed = false;
         }
