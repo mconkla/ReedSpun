@@ -4,14 +4,26 @@ using UnityEngine;
 
 public class playerMovement : MonoBehaviour
 {
+
+    public CharacterController2D controller;
+
+    float horizontalMove = 0f;
+
+    public float runSpeed = 40f;
+    bool jumpBool = false;
+    public bool slide = false;
+
+    /*----------------------------------------*/
     [HideInInspector]
     public Transform myTF;
-
+    Rigidbody2D myRB;
     public grabblingGunScript myGrabblingGun;
     
 
-    Rigidbody2D myRB;
+    
 
+
+    /*-----------------------------------------*/
     [Range(0, 1f)]
     public float movementSpeed1 = 0.2f;
     [Range(0, 1f)]
@@ -20,30 +32,19 @@ public class playerMovement : MonoBehaviour
     public float movementSpeed3 = 0.4f;
     [Range(0, 1f)]
     public float movementSpeed4 = 0.5f;
-
-    [Range(8, 20)]
-    public float jumpForce = 2f;
-    float jF;
-
     [Range(0, 3)]
     public float BoostTime = 1f;
-
-    Vector3 movementVector;
-    Vector2 jumpVector;
-
-    bool jumpAllowed = true,moving = false;
-
     private int speedlevel=3;
     Coroutine co;
+
+
 
     // Start is called before the first frame update
     void Awake()
     {
-        jF = jumpForce * 10;
+        
         myTF = GetComponent<Transform>();
         myRB = GetComponent<Rigidbody2D>();
-        movementVector = new Vector3(movementSpeed3, 0,0);
-        jumpVector = new Vector2(0, jF);
       
 
     }
@@ -51,66 +52,54 @@ public class playerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
-        getInput();
-    }
+        horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
 
-
-
-    void getInput()
-    {
-        float horizValue = Input.GetAxis("Horizontal");
         if (Input.GetButtonDown("Jump"))
         {
-            jump();
+            jumpBool = true;
         }
-        if (Mathf.Abs(horizValue) != 0 && !moving)
+
+        if (Input.GetButton("Slide"))
         {
-            moving = true;
-            move(horizValue);
-        }
-        else if (horizValue == 0 && moving)
+            slide = true;
+        }else if (Input.GetButtonUp("Slide"))
         {
-            moving = false;
-            stop();
+            slide = false;
         }
+      
     }
+
+    private void FixedUpdate()
+    {
+        //Move the character
+        controller.Move(horizontalMove * Time.fixedDeltaTime, slide, jumpBool);
+        jumpBool = false;
+    }
+
+
 
     void move(float horizValue)
     {
         switch (speedlevel)
         {
             case 4:
-                movementVector = new Vector3(movementSpeed4, 0, 0);
+               // movementVector = new Vector3(movementSpeed4, 0, 0);
                 break;
             case 3:
-                movementVector = new Vector3(movementSpeed3, 0, 0);
+                //movementVector = new Vector3(movementSpeed3, 0, 0);
                 break;
             case 2:
-                movementVector = new Vector3(movementSpeed2, 0, 0);
+               // movementVector = new Vector3(movementSpeed2, 0, 0);
                 break;
             case 1:
-                movementVector = new Vector3(movementSpeed1, 0, 0);
+               // movementVector = new Vector3(movementSpeed1, 0, 0);
                 break;
         }
-        myRB.AddForce(movementVector * Mathf.Sign(horizValue));
-       // myTF.position = myTF.position + (movementVector);
+       // myRB.AddForce(movementVector * Mathf.Sign(horizValue));
+       
     }
 
-    void stop()
-    {
-        myRB.velocity = Vector3.zero;
-    }
-    void jump()
-    {
-
-        if (jumpAllowed && !myGrabblingGun.grabbing)
-        {
-            myRB.AddForce(jumpVector);
-            jumpAllowed = false;
-        }
-        
-    }
+  
 
 
 
@@ -153,16 +142,7 @@ public class playerMovement : MonoBehaviour
     }
 
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-
-
-        if (collision.gameObject.tag == "floor")
-        {
-           
-            jumpAllowed = true;
-        }
-    }
+  
 
 
    
