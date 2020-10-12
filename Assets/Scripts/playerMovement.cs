@@ -8,6 +8,7 @@ public class playerMovement : MonoBehaviour
     public Transform myTF;
 
     public grabblingGunScript myGrabblingGun;
+    
 
     Rigidbody2D myRB;
 
@@ -15,7 +16,7 @@ public class playerMovement : MonoBehaviour
     public float movementSpeed1 = 0.2f;
     [Range(0, 1f)]
     public float movementSpeed2 = 0.3f;
-    [Range(0, 1f)]
+    [Range(10, 100f)]
     public float movementSpeed3 = 0.4f;
     [Range(0, 1f)]
     public float movementSpeed4 = 0.5f;
@@ -30,7 +31,7 @@ public class playerMovement : MonoBehaviour
     Vector3 movementVector;
     Vector2 jumpVector;
 
-    bool jumpAllowed = true;
+    bool jumpAllowed = true,moving = false;
 
     private int speedlevel=3;
     Coroutine co;
@@ -38,32 +39,44 @@ public class playerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        jF = jumpForce * 100f;
+        jF = jumpForce * 10;
         myTF = GetComponent<Transform>();
         myRB = GetComponent<Rigidbody2D>();
         movementVector = new Vector3(movementSpeed3, 0,0);
         jumpVector = new Vector2(0, jF);
-        
+      
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        move();
+       
         getInput();
     }
 
+
+
     void getInput()
     {
+        float horizValue = Input.GetAxis("Horizontal");
         if (Input.GetButtonDown("Jump"))
         {
             jump();
         }
-
+        if (Mathf.Abs(horizValue) != 0 && !moving)
+        {
+            moving = true;
+            move(horizValue);
+        }
+        else if (horizValue == 0 && moving)
+        {
+            moving = false;
+            stop();
+        }
     }
 
-    void move()
+    void move(float horizValue)
     {
         switch (speedlevel)
         {
@@ -80,15 +93,19 @@ public class playerMovement : MonoBehaviour
                 movementVector = new Vector3(movementSpeed1, 0, 0);
                 break;
         }
-        myTF.position = myTF.position + (movementVector);
+        myRB.AddForce(movementVector * Mathf.Sign(horizValue));
+       // myTF.position = myTF.position + (movementVector);
+    }
+
+    void stop()
+    {
+        myRB.velocity = Vector3.zero;
     }
     void jump()
     {
 
         if (jumpAllowed && !myGrabblingGun.grabbing)
         {
-            Debug.Log("JUMP");
-            myRB.velocity = Vector3.zero;
             myRB.AddForce(jumpVector);
             jumpAllowed = false;
         }
@@ -96,13 +113,6 @@ public class playerMovement : MonoBehaviour
     }
 
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-       if(collision.gameObject.tag == "floor")
-        {
-            jumpAllowed = true;
-        }
-    }
 
   public void increaseSpeed()
     {
@@ -124,6 +134,7 @@ public class playerMovement : MonoBehaviour
 
     public void decreaseSpeed()
     {
+        
         if (speedlevel == 1)
         {
             return;
@@ -140,4 +151,20 @@ public class playerMovement : MonoBehaviour
         speedlevel = newSpeedLevel;
         Debug.Log("MovementSpeed: " + speedlevel);
     }
+
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+
+
+        if (collision.gameObject.tag == "floor")
+        {
+           
+            jumpAllowed = true;
+        }
+    }
+
+
+   
+
 }
