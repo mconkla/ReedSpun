@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class setSpeed : MonoBehaviour
 {
+    public bool Slope=true;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,15 +22,29 @@ public class setSpeed : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             {
-                other.gameObject.GetComponent<playerMovement>().increaseSpeed();
+                if (Slope == true)
+                {
+                    other.gameObject.GetComponent<playerMovement>().increaseSpeed();
+                }
+                else
+                {
+                    other.gameObject.GetComponent<playerMovement>().decreaseSpeed();
+                }
                
             }
         }
 
     }
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerExit2D(Collider2D other)
     {
-
+        if (Slope == true)
+        {
+            
+        }
+        else
+        {
+            other.gameObject.GetComponent<playerMovement>().increaseSpeed();
+        }
     }
 
 }

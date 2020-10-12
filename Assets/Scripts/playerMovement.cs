@@ -11,8 +11,14 @@ public class playerMovement : MonoBehaviour
 
     Rigidbody2D myRB;
 
-    [Range(0, .3f)]
-    public float movementSpeed = 0.2f;
+    [Range(0, 1f)]
+    public float movementSpeed1 = 0.2f;
+    [Range(0, 1f)]
+    public float movementSpeed2 = 0.3f;
+    [Range(0, 1f)]
+    public float movementSpeed3 = 0.4f;
+    [Range(0, 1f)]
+    public float movementSpeed4 = 0.5f;
 
     [Range(8, 20)]
     public float jumpForce = 2f;
@@ -35,7 +41,7 @@ public class playerMovement : MonoBehaviour
         jF = jumpForce * 100f;
         myTF = GetComponent<Transform>();
         myRB = GetComponent<Rigidbody2D>();
-        movementVector = new Vector3(movementSpeed, 0,0);
+        movementVector = new Vector3(movementSpeed3, 0,0);
         jumpVector = new Vector2(0, jF);
         
 
@@ -59,7 +65,22 @@ public class playerMovement : MonoBehaviour
 
     void move()
     {
-        myTF.position = myTF.position + (movementVector*speedlevel);
+        switch (speedlevel)
+        {
+            case 4:
+                movementVector = new Vector3(movementSpeed4, 0, 0);
+                break;
+            case 3:
+                movementVector = new Vector3(movementSpeed3, 0, 0);
+                break;
+            case 2:
+                movementVector = new Vector3(movementSpeed2, 0, 0);
+                break;
+            case 1:
+                movementVector = new Vector3(movementSpeed1, 0, 0);
+                break;
+        }
+        myTF.position = myTF.position + (movementVector);
     }
     void jump()
     {
