@@ -11,17 +11,23 @@ public class playerMovement : MonoBehaviour
 
     Rigidbody2D myRB;
 
-    [Range(0, 5)]
-    public float movementSpeed = 0.5f;
+    [Range(0, .3f)]
+    public float movementSpeed = 0.2f;
 
     [Range(8, 20)]
     public float jumpForce = 2f;
     float jF;
 
+    [Range(0, 3)]
+    public float BoostTime = 1f;
+
     Vector3 movementVector;
     Vector2 jumpVector;
 
     bool jumpAllowed = true;
+
+    private int speedlevel=3;
+    Coroutine co;
 
     // Start is called before the first frame update
     void Awake()
@@ -31,6 +37,7 @@ public class playerMovement : MonoBehaviour
         myRB = GetComponent<Rigidbody2D>();
         movementVector = new Vector3(movementSpeed, 0,0);
         jumpVector = new Vector2(0, jF);
+        
 
     }
 
@@ -52,7 +59,7 @@ public class playerMovement : MonoBehaviour
 
     void move()
     {
-        myTF.position = myTF.position + movementVector;
+        myTF.position = myTF.position + (movementVector*speedlevel);
     }
     void jump()
     {
@@ -76,5 +83,40 @@ public class playerMovement : MonoBehaviour
         }
     }
 
-  
+  public void increaseSpeed()
+    {
+        if (speedlevel >=3)
+        {
+            if (co != null)
+            {
+                StopCoroutine(co);
+            }
+            speedlevel = 4;
+            co = StartCoroutine(waitThenSetSpeed(BoostTime, 3));
+        }
+        else
+        {
+            speedlevel += 1;
+        }
+        Debug.Log("MovementSpeed: "+ speedlevel);
+    }
+
+    public void decreaseSpeed()
+    {
+        if (speedlevel == 1)
+        {
+            return;
+        }
+        else 
+        {
+            speedlevel -= 1;
+        }
+        Debug.Log("MovementSpeed: " + speedlevel);
+    }
+    private IEnumerator waitThenSetSpeed(float timeToWait, int newSpeedLevel )
+    {
+        yield return new WaitForSeconds(timeToWait);
+        speedlevel = newSpeedLevel;
+        Debug.Log("MovementSpeed: " + speedlevel);
+    }
 }
