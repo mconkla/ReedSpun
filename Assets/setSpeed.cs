@@ -22,14 +22,7 @@ public class setSpeed : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             {
-                if (Slope == true)
-                {
-                    other.gameObject.GetComponent<playerMovement>().increaseSpeed();
-                }
-                else
-                {
-                    other.gameObject.GetComponent<playerMovement>().decreaseSpeed();
-                }
+              
                
             }
         }
@@ -43,7 +36,7 @@ public class setSpeed : MonoBehaviour
         }
         else
         {
-            other.gameObject.GetComponent<playerMovement>().increaseSpeed();
+           
         }
     }
 

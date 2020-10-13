@@ -7,6 +7,8 @@ public class playerMovement : MonoBehaviour
 
     public CharacterController2D controller;
 
+    public animationHandling animationController;
+
     float horizontalMove = 0f;
 
     public float runSpeed = 40f;
@@ -73,73 +75,10 @@ public class playerMovement : MonoBehaviour
     {
         //Move the character
         controller.Move(horizontalMove * Time.fixedDeltaTime, slide, jumpBool);
+        animationController.runValue = horizontalMove;
         jumpBool = false;
     }
 
-
-
-    void move(float horizValue)
-    {
-        switch (speedlevel)
-        {
-            case 4:
-               // movementVector = new Vector3(movementSpeed4, 0, 0);
-                break;
-            case 3:
-                //movementVector = new Vector3(movementSpeed3, 0, 0);
-                break;
-            case 2:
-               // movementVector = new Vector3(movementSpeed2, 0, 0);
-                break;
-            case 1:
-               // movementVector = new Vector3(movementSpeed1, 0, 0);
-                break;
-        }
-       // myRB.AddForce(movementVector * Mathf.Sign(horizValue));
-       
-    }
-
-  
-
-
-
-  public void increaseSpeed()
-    {
-        if (speedlevel >=3)
-        {
-            if (co != null)
-            {
-                StopCoroutine(co);
-            }
-            speedlevel = 4;
-            co = StartCoroutine(waitThenSetSpeed(BoostTime, 3));
-        }
-        else
-        {
-            speedlevel += 1;
-        }
-        Debug.Log("MovementSpeed: "+ speedlevel);
-    }
-
-    public void decreaseSpeed()
-    {
-        
-        if (speedlevel == 1)
-        {
-            return;
-        }
-        else 
-        {
-            speedlevel -= 1;
-        }
-        Debug.Log("MovementSpeed: " + speedlevel);
-    }
-    private IEnumerator waitThenSetSpeed(float timeToWait, int newSpeedLevel )
-    {
-        yield return new WaitForSeconds(timeToWait);
-        speedlevel = newSpeedLevel;
-        Debug.Log("MovementSpeed: " + speedlevel);
-    }
 
 
   
