@@ -76,6 +76,9 @@ public class playerMovement : MonoBehaviour
         //Move the character
         controller.Move(horizontalMove * Time.fixedDeltaTime, slide, jumpBool);
         animationController.runValue = horizontalMove;
+        animationController.jump = jumpBool;
+
+
         jumpBool = false;
     }
 

@@ -11,6 +11,10 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+    /************Speed level test*************/
+    public bool speedLevel_One_bool = false;
+    public float speedLevel_One_value = 1.5f;
+    /************Speed level test*************/
 
     const float k_GroundedRadius = .02f; // Radius of the overlap circle to determine if grounded
     private bool m_Grounded;            // Whether or not the player is grounded.
@@ -63,13 +67,18 @@ public class CharacterController2D : MonoBehaviour
 
     public void Move(float move, bool crouch, bool jump)
     {
+        /***********Speed level test************/
+        if (move == 0)
+        {
+            speedLevel_One_bool = false;
+        }
+        /************Speed level test*************/
         // If crouching, check to see if the character can stand up
         if (!crouch)
         {
             // If the character has a ceiling preventing them from standing up, keep them crouching
             if (Physics2D.OverlapCircle(m_CeilingCheck.position, k_CeilingRadius, m_WhatIsGround))
             {
-                Debug.Log("HAS TO CROUCH");
                 crouch = true;
             }
         }
@@ -94,6 +103,15 @@ public class CharacterController2D : MonoBehaviour
                 if (m_CrouchDisableCollider != null)
                     m_CrouchDisableCollider.enabled = false;
             }
+            /************Speed level test*************/
+            else if (speedLevel_One_bool)
+            {
+                move *= speedLevel_One_value;
+            }
+            /************Speed level test*************/
+
+
+
             else
             {
                 // Enable the collider when not crouching
@@ -106,6 +124,15 @@ public class CharacterController2D : MonoBehaviour
                     OnCrouchEvent.Invoke(false);
                 }
             }
+
+
+
+
+
+
+
+
+
 
             // Move the character by finding the target velocity
             Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
@@ -124,6 +151,7 @@ public class CharacterController2D : MonoBehaviour
                 // ... flip the player.
                 Flip();
             }
+           
         }
         // If the player should jump...
         if (m_Grounded && jump)
