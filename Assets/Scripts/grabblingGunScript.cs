@@ -7,6 +7,8 @@ public class grabblingGunScript : MonoBehaviour
     DistanceJoint2D rope;
     GameObject playerGO;
 
+    CharacterController2D charController2d;
+
     public Transform grabSurface;
 
     [HideInInspector]
@@ -28,7 +30,7 @@ public class grabblingGunScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        charController2d = FindObjectOfType<CharacterController2D>();
         myLineRenderer = gameObject.GetComponent<LineRenderer>();
         myLineRenderer.enabled = false;
         playerGO = this.transform.parent.gameObject;
@@ -74,7 +76,7 @@ public class grabblingGunScript : MonoBehaviour
 
     void setDirection()
     {
-        facingRight = playerGO.GetComponent<CharacterController2D>().m_FacingRight;
+        facingRight = charController2d.m_FacingRight;
         float dirVal = 0;
         if (facingRight)
             dirVal = 1;

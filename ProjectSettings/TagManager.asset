@@ -7,6 +7,7 @@ TagManager:
   - floor
   - grabSurface
   - grablingGun
+  - slope
   layers:
   - Default
   - TransparentFX

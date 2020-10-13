@@ -11,6 +11,8 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+    [SerializeField] private float maxClimAngle = 80f;
+
     /************Speed level test*************/
     public bool speedLevel_One_bool = false;
     public float speedLevel_One_value = 1.5f;
@@ -23,6 +25,8 @@ public class CharacterController2D : MonoBehaviour
     [HideInInspector]
     public bool m_FacingRight = true;  // For determining which way the player is currently facing.
     private Vector3 m_Velocity = Vector3.zero;
+
+    Vector3 targetVelocity;
 
     [Header("Events")]
     [Space]
@@ -45,7 +49,7 @@ public class CharacterController2D : MonoBehaviour
         if (OnCrouchEvent == null)
             OnCrouchEvent = new BoolEvent();
     }
-
+  
     private void FixedUpdate()
     {
         bool wasGrounded = m_Grounded;
@@ -134,9 +138,22 @@ public class CharacterController2D : MonoBehaviour
 
 
 
-
+            
             // Move the character by finding the target velocity
-            Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
+            targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
+            
+
+            RayCast();
+            if (!m_Grounded && !walkingUp) 
+            {
+                m_Rigidbody2D.gravityScale = 20f;
+            }
+            else
+            {
+                m_Rigidbody2D.gravityScale = 0f;
+            }
+
+
             // And then smoothing it out and applying it to the character
             m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
@@ -160,10 +177,11 @@ public class CharacterController2D : MonoBehaviour
             // Add a vertical force to the player.
             m_Grounded = false;
             m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+           
         }
+
     }
-
-
+    
     private void Flip()
     {
         // Switch the way the player is labelled as facing.
@@ -173,5 +191,52 @@ public class CharacterController2D : MonoBehaviour
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
+    }
+
+    bool walkingUp = false;
+    void RayCast()
+    {
+        float dirVal = m_FacingRight ? 1 : -1;
+        RaycastHit2D horizontalRayCastHit = Physics2D.Raycast(transform.position, Vector2.right * dirVal, 2f);
+        Debug.DrawRay(transform.position, Vector2.right * dirVal * 20f);
+
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, 10f);
+        Debug.DrawRay(transform.position, -Vector2.up * 20f);
+
+        Debug.Log(horizontalRayCastHit.collider);
+        if (horizontalRayCastHit.collider != null && horizontalRayCastHit.collider.gameObject.tag == "slope")
+        {
+            walkingUp = true;
+            float slopeAngle = Vector2.Angle(horizontalRayCastHit.normal, Vector2.up);
+            if (slopeAngle < maxClimAngle)
+                climbSlope(slopeAngle);
+        }
+        else if (horizontalRayCastHit.collider == null && hit.collider != null && hit.collider.gameObject.tag == "slope")
+        {
+            walkingUp = false;
+            float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+            if (slopeAngle < maxClimAngle)
+                climbSlope(-slopeAngle);
+        }
+        else if (hit.collider != null && hit.collider.gameObject.tag != "slope")
+        {
+            climbSlope(0);
+        }
+       
+        
+    }
+
+
+ 
+        
+        
+        
+    
+    void climbSlope(float slopeAngle)
+    {
+        float moveDistance = Mathf.Abs(targetVelocity.x);
+        targetVelocity.y = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
+        targetVelocity.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign(targetVelocity.x);
+
     }
 }

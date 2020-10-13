@@ -36,7 +36,7 @@ public class traceMaker : MonoBehaviour
 
     private void startDeathTimer()
     {
-        Debug.Log(traceSpriteRenderer.color.a);
+       // Debug.Log(traceSpriteRenderer.color.a);
         float temp = traceSpriteRenderer.color.a;
         if (temp > 0)
         {
