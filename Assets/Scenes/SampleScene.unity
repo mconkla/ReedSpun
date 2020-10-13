@@ -2197,9 +2197,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.59411967}
+  m_Offset: {x: 0, y: -0.5692001}
   serializedVersion: 2
-  m_Radius: 0.5189227
+  m_Radius: 0.49400312
 --- !u!114 &1087679919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2224,6 +2224,7 @@ MonoBehaviour:
   m_CrouchDisableCollider: {fileID: 1087679913}
   speedLevel_One_bool: 0
   speedLevel_One_value: 1.5
+  m_FacingRight: 1
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []

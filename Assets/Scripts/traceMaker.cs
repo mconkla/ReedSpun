@@ -46,7 +46,7 @@ public class traceMaker : MonoBehaviour
         }
         else
         {
-            Destroy(this);
+            Destroy(this.gameObject);
         }
     }
 }

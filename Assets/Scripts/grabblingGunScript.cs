@@ -17,7 +17,11 @@ public class grabblingGunScript : MonoBehaviour
     [Range(-1.0f, 1.0f)]
     public float ankleValue = 0f;
 
+    bool facingRight = true;
+
     LineRenderer myLineRenderer;
+
+
 
 
     Vector3 directionRope = new Vector3();
@@ -70,15 +74,21 @@ public class grabblingGunScript : MonoBehaviour
 
     void setDirection()
     {
-        directionRope = new Vector3(transform.position.x + 1, transform.position.y + 1, transform.position.z) - transform.position;
+        facingRight = playerGO.GetComponent<CharacterController2D>().m_FacingRight;
+        float dirVal = 0;
+        if (facingRight)
+            dirVal = 1;
+        else
+            dirVal = -1;
+        directionRope = new Vector3(transform.position.x + dirVal, transform.position.y + 1, transform.position.z) - transform.position;
 
         if (ankleValue < 0)
         {
-            directionRope = new Vector3(transform.position.x + 1 - Mathf.Abs(ankleValue), transform.position.y + 1, transform.position.z) - transform.position;
+            directionRope = new Vector3(transform.position.x + dirVal - Mathf.Abs(ankleValue), transform.position.y + 1, transform.position.z) - transform.position;
         }
         else if (ankleValue > 0)
         {
-            directionRope = new Vector3(transform.position.x + 1, transform.position.y + 1 - Mathf.Abs(ankleValue), transform.position.z) - transform.position;
+            directionRope = new Vector3(transform.position.x + dirVal, transform.position.y + 1 - Mathf.Abs(ankleValue), transform.position.z) - transform.position;
         }
     }
 
