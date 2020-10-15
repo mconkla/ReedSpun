@@ -12,10 +12,23 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [SerializeField] private float maxClimAngle = 80f;
+    [SerializeField] private float slopeCheckDistance;
+    [SerializeField] private float movementSpeed = 10f;
+
+    CircleCollider2D feet;
+    float colliderOffset;
+    float colliderRadius;
+    float slopeDownAngle;
+    float slopeDownAngleOld;
+    float slopeSideAngle;
+    bool isOnSlope;
+    Vector2 slopeNormalPerp;
+    public PhysicsMaterial2D fric_mat,no_fric_mat;
+
 
     /************Speed level test*************/
     public bool speedLevel_One_bool = false;
-    public float speedLevel_One_value = 1.5f;
+    public float speedLevel_One_value = 1.2f;
     /************Speed level test*************/
 
     const float k_GroundedRadius = .02f; // Radius of the overlap circle to determine if grounded
@@ -26,7 +39,7 @@ public class CharacterController2D : MonoBehaviour
     public bool m_FacingRight = true;  // For determining which way the player is currently facing.
     private Vector3 m_Velocity = Vector3.zero;
 
-    Vector3 targetVelocity;
+    Vector2 targetVelocity;
 
     [Header("Events")]
     [Space]
@@ -39,8 +52,13 @@ public class CharacterController2D : MonoBehaviour
     public BoolEvent OnCrouchEvent;
     private bool m_wasCrouching = false;
 
+
+    bool canWalkOnSlope = true,isJumping = false,canJump = true;
     private void Awake()
     {
+        feet = GetComponent<CircleCollider2D>();
+        colliderRadius = feet.radius;
+        colliderOffset = feet.offset.y;
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
 
         if (OnLandEvent == null)
@@ -50,11 +68,82 @@ public class CharacterController2D : MonoBehaviour
             OnCrouchEvent = new BoolEvent();
     }
   
+    void SlopeCheck()
+    {
+        Vector2 checkPos = this.transform.position - new Vector3(0.0f, colliderRadius + Mathf.Abs(colliderOffset), 0.0f);
+        SlopeCheckHorizontal(checkPos);
+        SlopeCheckVertical(checkPos);
+    
+    }
+
+
+    void SlopeCheckHorizontal(Vector2 checkPos)
+    {
+        RaycastHit2D slopeHitFront = Physics2D.Raycast(new Vector2(checkPos.x,checkPos.y+0.1f),transform.right,slopeCheckDistance,m_WhatIsGround);
+        RaycastHit2D slopeHitBack = Physics2D.Raycast(new Vector2(checkPos.x, checkPos.y+0.1f), -transform.right, slopeCheckDistance, m_WhatIsGround);
+        Debug.DrawRay(slopeHitFront.point, Vector2.right, Color.blue);
+        Debug.DrawRay(slopeHitBack.point, -Vector2.right, Color.blue);
+        if (slopeHitFront)
+        {
+            isOnSlope = true;
+            slopeSideAngle = Vector2.Angle(slopeHitFront.normal, Vector2.up);
+            Debug.Log(slopeSideAngle);
+        }
+        else if (slopeHitBack)
+        {
+            isOnSlope = true;
+            slopeSideAngle = Vector2.Angle(slopeHitBack.normal, Vector2.up);
+        }
+        else
+        {
+            slopeSideAngle = 0.0f;
+            
+        }
+    }
+
+    void SlopeCheckVertical(Vector2 checkPos)
+    {
+        RaycastHit2D hit = Physics2D.Raycast(checkPos, Vector2.down, slopeCheckDistance, m_WhatIsGround);
+        //this.gameObject.transform.up = hit.normal;
+        if (hit)
+        {
+            slopeNormalPerp = Vector2.Perpendicular(hit.normal).normalized;
+
+            slopeDownAngle = Vector2.Angle(hit.normal,Vector2.up);
+
+            if(slopeDownAngle != slopeDownAngleOld)
+            {
+                isOnSlope = true;
+            }
+            slopeDownAngleOld = slopeDownAngle;
+
+            Debug.DrawRay(hit.point, slopeNormalPerp, Color.red);
+            Debug.DrawRay(hit.point, hit.normal, Color.green);
+           
+        }
+
+        if (slopeDownAngle > maxClimAngle || slopeSideAngle > maxClimAngle)
+        {
+            canWalkOnSlope = false;
+        }
+        else
+        {
+            canWalkOnSlope = true;
+        }
+    }
+
+    private void Update()
+    {
+        SlopeCheck();
+        
+        
+    }
     private void FixedUpdate()
     {
+        
         bool wasGrounded = m_Grounded;
         m_Grounded = false;
-
+        
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
         Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
@@ -63,15 +152,20 @@ public class CharacterController2D : MonoBehaviour
             if (colliders[i].gameObject != gameObject)
             {
                 m_Grounded = true;
+                isJumping = false;
                 if (!wasGrounded)
                     OnLandEvent.Invoke();
             }
         }
+
+      
+
     }
 
 
     public void Move(float move, bool crouch, bool jump)
     {
+       
         /***********Speed level test************/
         if (move == 0)
         {
@@ -132,31 +226,46 @@ public class CharacterController2D : MonoBehaviour
 
 
 
-
-
-
-
-
-
-            
-            // Move the character by finding the target velocity
-            targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
-            
-
-            RayCast();
-            if (!m_Grounded && !walkingUp) 
+            if (m_Grounded && !isOnSlope) //if not on slope
             {
-                m_Rigidbody2D.gravityScale = 20f;
+
+                targetVelocity.Set(movementSpeed * move, 0.0f);
+                m_Rigidbody2D.velocity = targetVelocity;
+                //m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+                // Debug.Log("bewgung uf em boden");
+            }
+            else if (m_Grounded && isOnSlope && canWalkOnSlope && !isJumping) //If on slope
+            {
+                targetVelocity.Set(slopeNormalPerp.x * -move * movementSpeed, slopeNormalPerp.y * -move * movementSpeed);
+                m_Rigidbody2D.velocity = targetVelocity;
+                //m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+                Debug.Log("bewgung uf em slope");
+            }
+            else if (!m_Grounded) //If in air
+            {
+                targetVelocity.Set(move * movementSpeed, m_Rigidbody2D.velocity.y);
+               //m_Rigidbody2D.velocity = targetVelocity;
+                m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+                Debug.Log("bewgung uf inna luft");
+            }
+
+
+
+            // Move the character by finding the target velocity
+            //targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
+            if (targetVelocity.x == 0)
+            {
+                feet.sharedMaterial = fric_mat;
             }
             else
             {
-                m_Rigidbody2D.gravityScale = 0f;
+                feet.sharedMaterial = no_fric_mat;
             }
 
 
-            // And then smoothing it out and applying it to the character
-            m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
+            // And then smoothing it out and applying it to the character
+            
             // If the input is moving the player right and the player is facing left...
             if (move > 0 && !m_FacingRight)
             {
@@ -174,11 +283,18 @@ public class CharacterController2D : MonoBehaviour
         // If the player should jump...
         if (m_Grounded && jump)
         {
+            isJumping = true;
             // Add a vertical force to the player.
             m_Grounded = false;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+            targetVelocity.Set(m_Rigidbody2D.velocity.x, m_JumpForce);
+            //m_Rigidbody2D.velocity = targetVelocity;
+            m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+            Debug.Log("bewgung uf inna luft");
+
+           // m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
            
         }
+
 
     }
     
@@ -193,50 +309,13 @@ public class CharacterController2D : MonoBehaviour
         transform.localScale = theScale;
     }
 
-    bool walkingUp = false;
-    void RayCast()
-    {
-        float dirVal = m_FacingRight ? 1 : -1;
-        RaycastHit2D horizontalRayCastHit = Physics2D.Raycast(transform.position, Vector2.right * dirVal, 2f);
-        Debug.DrawRay(transform.position, Vector2.right * dirVal * 20f);
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, -Vector2.up, 10f);
-        Debug.DrawRay(transform.position, -Vector2.up * 20f);
-
-        Debug.Log(horizontalRayCastHit.collider);
-        if (horizontalRayCastHit.collider != null && horizontalRayCastHit.collider.gameObject.tag == "slope")
-        {
-            walkingUp = true;
-            float slopeAngle = Vector2.Angle(horizontalRayCastHit.normal, Vector2.up);
-            if (slopeAngle < maxClimAngle)
-                climbSlope(slopeAngle);
-        }
-        else if (horizontalRayCastHit.collider == null && hit.collider != null && hit.collider.gameObject.tag == "slope")
-        {
-            walkingUp = false;
-            float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-            if (slopeAngle < maxClimAngle)
-                climbSlope(-slopeAngle);
-        }
-        else if (hit.collider != null && hit.collider.gameObject.tag != "slope")
-        {
-            climbSlope(0);
-        }
-       
-        
-    }
-
-
- 
-        
-        
-        
     
-    void climbSlope(float slopeAngle)
-    {
-        float moveDistance = Mathf.Abs(targetVelocity.x);
-        targetVelocity.y = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
-        targetVelocity.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign(targetVelocity.x);
 
-    }
+
+
+
+
+
+
 }

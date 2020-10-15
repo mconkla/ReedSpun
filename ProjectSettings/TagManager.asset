@@ -8,6 +8,7 @@ TagManager:
   - grabSurface
   - grablingGun
   - slope
+  - slope_trigger
   layers:
   - Default
   - TransparentFX

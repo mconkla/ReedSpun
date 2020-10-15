@@ -2016,10 +2016,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 0.05
+  m_Mass: 0.02
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 0
+  m_GravityScale: 10
   m_Material: {fileID: 6200000, guid: 3105897fb31386440baa96a265eb5ab3, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -2034,7 +2034,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 1087679911}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 3105897fb31386440baa96a265eb5ab3, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -2111,7 +2111,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1087679911}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.3, y: -1.489, z: 0}
+  m_LocalPosition: {x: 5.3, y: -1.152, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1662148868}
@@ -2166,7 +2166,7 @@ CircleCollider2D:
   m_GameObject: {fileID: 1087679911}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 3105897fb31386440baa96a265eb5ab3, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -2196,6 +2196,10 @@ MonoBehaviour:
   m_CeilingCheck: {fileID: 812795478}
   m_CrouchDisableCollider: {fileID: 1087679913}
   maxClimAngle: 80
+  slopeCheckDistance: 1
+  movementSpeed: 10
+  fric_mat: {fileID: 6200000, guid: 0b713c306b1f4594fac4eaff906db7b2, type: 2}
+  no_fric_mat: {fileID: 6200000, guid: 3105897fb31386440baa96a265eb5ab3, type: 2}
   speedLevel_One_bool: 0
   speedLevel_One_value: 1.5
   m_FacingRight: 1
@@ -2299,13 +2303,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1185927516}
-  m_LocalRotation: {x: 0, y: 0, z: -0.22765417, w: 0.97374207}
-  m_LocalPosition: {x: 36.894646, y: -8.97821, z: 0.1}
-  m_LocalScale: {x: 21.662659, y: 3.5323222, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0.19797122, w: 0.98020786}
+  m_LocalPosition: {x: 39.32, y: -9.27, z: 0.1}
+  m_LocalScale: {x: 26.208334, y: 3.5323222, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -26.318}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -22.837}
 --- !u!61 &1185927518
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2759,7 +2763,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1648106828}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.144, z: 0}
+  m_LocalPosition: {x: 0, y: -1.388, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1087679915}
